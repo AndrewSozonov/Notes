@@ -7,6 +7,8 @@ import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.GridLayoutManager
 import kotlinx.android.synthetic.main.activity_main.*
 import ru.andreysozonov.notes.R
+import ru.andreysozonov.notes.data.entity.Note
+import ru.andreysozonov.notes.ui.note.NoteActivity
 
 class MainActivity : AppCompatActivity() {
 
@@ -21,14 +23,25 @@ class MainActivity : AppCompatActivity() {
 
         viewModel = ViewModelProviders.of(this).get(MainViewModel::class.java)
 
-        viewModel.viewState().observe(this, Observer<MainViewState> {it ->
+        viewModel.viewState().observe(this, Observer<MainViewState> { it ->
             it?.let { adapter.notes = it.notes }
         })
+
+        fab.setOnClickListener { openNoteScreen(null) }
     }
 
-    fun initRecyclerView(){
-        adapter = MainAdapter()
-        mainRecycler.layoutManager = GridLayoutManager(this, 2)
+    fun initRecyclerView() {
+        adapter = MainAdapter(object : MainAdapter.OnItemClickListener {
+            override fun onItemClick(note: Note) {
+                openNoteScreen(note)
+            }
+        })
+        mainRecycler.layoutManager = GridLayoutManager(this, 1)
         mainRecycler.adapter = adapter
+    }
+
+    private fun openNoteScreen(note: Note?) {
+        val intent = NoteActivity.getStartIntent(this, note)
+        startActivity(intent)
     }
 }

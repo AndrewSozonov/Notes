@@ -34,5 +34,17 @@
         tools:layoutManager="GridLayoutManager"
         tools:spanCount="2"/>
 
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:fabSize="mini"
+        android:layout_marginEnd="20dp"
+        android:layout_marginBottom="20dp"
+        app:layout_anchorGravity="bottom|end"
+        app:layout_anchor="@id/mainRecycler"
+        android:clickable="true"
+        app:srcCompat="@drawable/ic_add_circle_black_24dp"
+        app:layout_behavior=".ui.common.FABBehavior"/>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
