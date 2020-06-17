@@ -1,32 +1,27 @@
 package ru.andreysozonov.notes.ui.main
 
-import androidx.appcompat.app.AppCompatActivity
+
 import android.os.Bundle
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.GridLayoutManager
 import kotlinx.android.synthetic.main.activity_main.*
 import ru.andreysozonov.notes.R
 import ru.andreysozonov.notes.data.entity.Note
+import ru.andreysozonov.notes.ui.base.BaseActivity
 import ru.andreysozonov.notes.ui.note.NoteActivity
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : BaseActivity<List<Note>?, MainViewState>() {
 
-    lateinit var viewModel: MainViewModel
+    override val viewModel: MainViewModel by lazy {
+        ViewModelProviders.of(this).get(MainViewModel::class.java)
+    }
+    override val layoutRes: Int = R.layout.activity_main
     lateinit var adapter: MainAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
         initRecyclerView()
-
-        viewModel = ViewModelProviders.of(this).get(MainViewModel::class.java)
-
-        viewModel.viewState().observe(this, Observer<MainViewState> { it ->
-            it?.let { adapter.notes = it.notes }
-        })
-
         fab.setOnClickListener { openNoteScreen(null) }
     }
 
@@ -38,6 +33,11 @@ class MainActivity : AppCompatActivity() {
         })
         mainRecycler.layoutManager = GridLayoutManager(this, 1)
         mainRecycler.adapter = adapter
+    }
+
+    override fun renderData(data: List<Note>?) {
+        if (data == null) return
+        adapter.notes = data
     }
 
     private fun openNoteScreen(note: Note?) {

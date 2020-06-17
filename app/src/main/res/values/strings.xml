@@ -3,4 +3,5 @@
     <string name="title">Title</string>
     <string name="body">Note with some text</string>
     <string name="new_note_title">New note</string>
+    <string name="ok_button">Ok</string>
 </resources>
