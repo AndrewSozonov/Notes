@@ -43,6 +43,7 @@ class MainAdapter(private val onItemClickListener: OnItemClickListener) :
         fun bind(note: Note) = with(itemView) {
             title.text = note.title
             body.text = note.note
+
             val color = when (note.color) {
                 Color.WHITE -> R.color.color_white
                 Color.VIOLET -> R.color.color_violet

@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "223411099452",
+    "firebase_url": "https://notes-63327.firebaseio.com",
+    "project_id": "notes-63327",
+    "storage_bucket": "notes-63327.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:223411099452:android:8bcbd854c0d822adc43039",
+        "android_client_info": {
+          "package_name": "ru.andreysozonov.notes"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "223411099452-8sgdtjvbhh270sl331frv95bgs5q40sa.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA5Y_5KTaTOe6A85ob6mQPm-Qy1uGHx_7M"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "223411099452-8sgdtjvbhh270sl331frv95bgs5q40sa.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
