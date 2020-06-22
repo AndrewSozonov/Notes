@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProviders
@@ -13,10 +14,13 @@ import ru.andreysozonov.notes.R
 import ru.andreysozonov.notes.data.NotesRepository
 import ru.andreysozonov.notes.data.entity.Color
 import ru.andreysozonov.notes.data.entity.Note
+import ru.andreysozonov.notes.ui.base.BaseActivity
 import java.text.SimpleDateFormat
 import java.util.*
 
-class NoteActivity : AppCompatActivity() {
+class NoteActivity : BaseActivity<Note?, NoteViewState>() {
+
+    private val TAG = "NoteActivity"
 
     companion object {
         private val EXTRA_NOTE = NoteActivity::class.java.name + "Extra.note"
@@ -29,25 +33,31 @@ class NoteActivity : AppCompatActivity() {
         }
     }
 
-    private lateinit var viewModel: NoteViewModel
+
+    override val viewModel: NoteViewModel by lazy {
+        ViewModelProviders.of(this).get(NoteViewModel::class.java)
+    }
+    override val layoutRes: Int = R.layout.activity_note
     private var note: Note? = null
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_note)
-
-        note = intent.getParcelableExtra(EXTRA_NOTE)
-
-        viewModel = ViewModelProviders.of(this).get(NoteViewModel::class.java)
-
         setSupportActionBar(toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.title = if (note != null) {
+
             SimpleDateFormat(DATE_TIME_FORMAT, Locale.getDefault()).format(note!!.lastChanged)
         } else {
             getString(R.string.new_note_title)
         }
+        note = intent.getParcelableExtra(EXTRA_NOTE)
+        //Log.d(TAG, "noteId: $noteId")
+
+        /*noteId?.let {id -> viewModel.loadNote(id) } ?: let {
+            //supportActionBar?.title = getString(R.string.new_note_title)
+
+        }*/
 
         initView()
     }
@@ -64,6 +74,11 @@ class NoteActivity : AppCompatActivity() {
 
 
     private fun initView() {
+
+        titleEt.removeTextChangedListener(textChangeListener)
+        bodyEt.removeTextChangedListener(textChangeListener)
+
+        Log.d(TAG, "note: ${note?.title} ${note?.id}")
         if (note != null) {
             titleEt.setText(note?.title ?: "")
             bodyEt.setText(note?.note ?: "")
@@ -108,11 +123,16 @@ class NoteActivity : AppCompatActivity() {
     }
 
     private fun createNewNote(): Note {
+
         return Note(
             UUID.randomUUID().toString(),
             titleEt.text.toString(),
-            bodyEt.text.toString(),
-            color = if (NotesRepository.getNotes().value!!.size % 2 == 0) Color.BLUE else Color.VIOLET
+            bodyEt.text.toString()
         )
+    }
+
+    override fun renderData(data: Note?) {
+        this.note = data
+        initView()
     }
 }
