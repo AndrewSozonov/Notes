@@ -7,10 +7,10 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
-import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.GridLayoutManager
 import com.firebase.ui.auth.AuthUI
 import kotlinx.android.synthetic.main.activity_main.*
+import org.koin.android.viewmodel.ext.android.viewModel
 import ru.andreysozonov.notes.R
 import ru.andreysozonov.notes.data.entity.Note
 import ru.andreysozonov.notes.ui.base.BaseActivity
@@ -23,9 +23,7 @@ class MainActivity : BaseActivity<List<Note>?, MainViewState>(), LogoutDialog.Lo
         fun getStartIntent(context: Context) = Intent(context, MainActivity::class.java)
     }
 
-    override val viewModel: MainViewModel by lazy {
-        ViewModelProviders.of(this).get(MainViewModel::class.java)
-    }
+    override val model: MainViewModel by viewModel()
     override val layoutRes: Int = R.layout.activity_main
     lateinit var adapter: MainAdapter
 
@@ -53,7 +51,7 @@ class MainActivity : BaseActivity<List<Note>?, MainViewState>(), LogoutDialog.Lo
     }
 
     private fun openNoteScreen(note: Note?) {
-        val intent = NoteActivity.getStartIntent(this, note, adapter.itemCount)
+        val intent = NoteActivity.getStartIntent(this, note?.id, adapter.itemCount)
         startActivity(intent)
     }
 
@@ -80,6 +78,4 @@ class MainActivity : BaseActivity<List<Note>?, MainViewState>(), LogoutDialog.Lo
                 finish()
             }
     }
-
-
 }
