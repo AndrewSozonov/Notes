@@ -7,11 +7,10 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
 import android.view.MenuItem
-import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProviders
 import kotlinx.android.synthetic.main.activity_note.*
 import ru.andreysozonov.notes.R
-import ru.andreysozonov.notes.data.NotesRepository
 import ru.andreysozonov.notes.data.entity.Color
 import ru.andreysozonov.notes.data.entity.Note
 import ru.andreysozonov.notes.ui.base.BaseActivity
@@ -25,18 +24,20 @@ class NoteActivity : BaseActivity<Note?, NoteViewState>() {
     companion object {
         private val EXTRA_NOTE = NoteActivity::class.java.name + "Extra.note"
         private const val DATE_TIME_FORMAT = "dd.MM.yy HH:mm"
+        private const val ITEM_COUNT = "items"
 
-        fun getStartIntent(context: Context, note: Note?): Intent {
+        fun getStartIntent(context: Context, note: Note?, itemCount: Int): Intent {
             val intent = Intent(context, NoteActivity::class.java)
             intent.putExtra(EXTRA_NOTE, note)
+            intent.putExtra(ITEM_COUNT, itemCount)
             return intent
         }
     }
 
-
     override val viewModel: NoteViewModel by lazy {
         ViewModelProviders.of(this).get(NoteViewModel::class.java)
     }
+
     override val layoutRes: Int = R.layout.activity_note
     private var note: Note? = null
 
@@ -52,12 +53,6 @@ class NoteActivity : BaseActivity<Note?, NoteViewState>() {
             getString(R.string.new_note_title)
         }
         note = intent.getParcelableExtra(EXTRA_NOTE)
-        //Log.d(TAG, "noteId: $noteId")
-
-        /*noteId?.let {id -> viewModel.loadNote(id) } ?: let {
-            //supportActionBar?.title = getString(R.string.new_note_title)
-
-        }*/
 
         initView()
     }
@@ -82,6 +77,7 @@ class NoteActivity : BaseActivity<Note?, NoteViewState>() {
         if (note != null) {
             titleEt.setText(note?.title ?: "")
             bodyEt.setText(note?.note ?: "")
+
             val color = when (note!!.color) {
                 Color.WHITE -> R.color.color_white
                 Color.VIOLET -> R.color.color_violet
@@ -91,7 +87,7 @@ class NoteActivity : BaseActivity<Note?, NoteViewState>() {
                 Color.GREEN -> R.color.color_green
                 Color.BLUE -> R.color.color_blue
             }
-            toolbar.setBackgroundColor(color)
+            toolbar.setBackgroundColor(ContextCompat.getColor(this, color))
         }
 
         titleEt.addTextChangedListener(textChangeListener)
@@ -123,11 +119,17 @@ class NoteActivity : BaseActivity<Note?, NoteViewState>() {
     }
 
     private fun createNewNote(): Note {
+        val count = intent.getIntExtra(ITEM_COUNT, 0)
 
         return Note(
             UUID.randomUUID().toString(),
             titleEt.text.toString(),
-            bodyEt.text.toString()
+            bodyEt.text.toString(),
+            color = if (count % 2 == 0) {
+                Color.VIOLET
+            } else {
+                Color.BLUE
+            }
         )
     }
 

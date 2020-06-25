@@ -16,5 +16,7 @@ object NotesRepository {
 
     fun getNoteById(id: String) = remoteDataProvider.getNoteById(id)
 
+    fun getCurrentUser() = remoteDataProvider.getCurrentUser()
+
 }
 
