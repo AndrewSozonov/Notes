@@ -6,7 +6,7 @@ import ru.andreysozonov.notes.data.entity.Note
 import ru.andreysozonov.notes.data.model.Result
 import ru.andreysozonov.notes.ui.base.BaseViewModel
 
-class NoteViewModel(val notesRepository: NotesRepository) :
+open class NoteViewModel(val notesRepository: NotesRepository) :
     BaseViewModel<NoteViewState.Data, NoteViewState>() {
 
 
