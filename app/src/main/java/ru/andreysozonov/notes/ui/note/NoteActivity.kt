@@ -1,45 +1,42 @@
 package ru.andreysozonov.notes.ui.note
 
+import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.Log
+import android.view.Menu
 import android.view.MenuItem
-import androidx.core.content.ContextCompat
-import androidx.lifecycle.ViewModelProviders
 import kotlinx.android.synthetic.main.activity_note.*
+import org.koin.android.viewmodel.ext.android.viewModel
 import ru.andreysozonov.notes.R
+import ru.andreysozonov.notes.common.getColorInt
 import ru.andreysozonov.notes.data.entity.Color
 import ru.andreysozonov.notes.data.entity.Note
 import ru.andreysozonov.notes.ui.base.BaseActivity
 import java.text.SimpleDateFormat
 import java.util.*
 
-class NoteActivity : BaseActivity<Note?, NoteViewState>() {
-
-    private val TAG = "NoteActivity"
+class NoteActivity : BaseActivity<NoteViewState.Data, NoteViewState>() {
 
     companion object {
         private val EXTRA_NOTE = NoteActivity::class.java.name + "Extra.note"
         private const val DATE_TIME_FORMAT = "dd.MM.yy HH:mm"
         private const val ITEM_COUNT = "items"
 
-        fun getStartIntent(context: Context, note: Note?, itemCount: Int): Intent {
+        fun getStartIntent(context: Context, id: String?, itemCount: Int): Intent {
             val intent = Intent(context, NoteActivity::class.java)
-            intent.putExtra(EXTRA_NOTE, note)
+            intent.putExtra(EXTRA_NOTE, id)
             intent.putExtra(ITEM_COUNT, itemCount)
             return intent
         }
     }
 
-    override val viewModel: NoteViewModel by lazy {
-        ViewModelProviders.of(this).get(NoteViewModel::class.java)
-    }
-
+    override val model: NoteViewModel by viewModel()
     override val layoutRes: Int = R.layout.activity_note
     private var note: Note? = null
+    private var color: Color = Color.WHITE
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -52,8 +49,9 @@ class NoteActivity : BaseActivity<Note?, NoteViewState>() {
         } else {
             getString(R.string.new_note_title)
         }
-        note = intent.getParcelableExtra(EXTRA_NOTE)
+        val id = intent.getStringExtra(EXTRA_NOTE)
 
+        id?.let { model.loadNote(it) }
         initView()
     }
 
@@ -63,7 +61,6 @@ class NoteActivity : BaseActivity<Note?, NoteViewState>() {
         }
 
         override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-
         override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
     }
 
@@ -73,35 +70,34 @@ class NoteActivity : BaseActivity<Note?, NoteViewState>() {
         titleEt.removeTextChangedListener(textChangeListener)
         bodyEt.removeTextChangedListener(textChangeListener)
 
-        Log.d(TAG, "note: ${note?.title} ${note?.id}")
-        if (note != null) {
+
+        note?.let {
             titleEt.setText(note?.title ?: "")
             bodyEt.setText(note?.note ?: "")
+            titleEt.setSelection(titleEt.text?.length ?: 0)
+            bodyEt.setSelection(bodyEt.text?.length ?: 0)
+            setToolbarColor(note!!.color)
+        }
 
-            val color = when (note!!.color) {
-                Color.WHITE -> R.color.color_white
-                Color.VIOLET -> R.color.color_violet
-                Color.YELLOW -> R.color.color_yellow
-                Color.RED -> R.color.color_red
-                Color.PINK -> R.color.color_pink
-                Color.GREEN -> R.color.color_green
-                Color.BLUE -> R.color.color_blue
-            }
-            toolbar.setBackgroundColor(ContextCompat.getColor(this, color))
+        colorPicker.onColorClickListener = {
+            color = it
+            setToolbarColor(it)
+            saveNote()
         }
 
         titleEt.addTextChangedListener(textChangeListener)
         bodyEt.addTextChangedListener(textChangeListener)
     }
 
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean =
+        menuInflater.inflate(R.menu.note_menu, menu).let { true }
+
     override fun onOptionsItemSelected(item: MenuItem): Boolean =
         when (item.itemId) {
-            android.R.id.home -> {
-                onBackPressed()
-                true
-            }
+            android.R.id.home -> super.onBackPressed().let { true }
+            R.id.palette -> togglePalette().let { true }
+            R.id.delete -> deleteNote().let { true }
             else -> super.onOptionsItemSelected(item)
-
         }
 
     private fun saveNote() {
@@ -110,31 +106,55 @@ class NoteActivity : BaseActivity<Note?, NoteViewState>() {
         note = note?.copy(
             title = titleEt.text.toString(),
             note = bodyEt.text.toString(),
-            lastChanged = Date()
-        ) ?: createNewNote()
+            lastChanged = Date(),
+            color = color
+        )
+            ?: createNewNote()
 
         note?.let {
-            viewModel.saveChanges(it)
+            model.saveChanges(it)
         }
     }
 
-    private fun createNewNote(): Note {
-        val count = intent.getIntExtra(ITEM_COUNT, 0)
+    fun deleteNote() {
+        AlertDialog.Builder(this)
+            .setMessage(R.string.delete_menu_message)
+            .setPositiveButton(R.string.note_delete_ok) { dialog, which -> model.deleteNote() }
+            .setNegativeButton(R.string.note_delete_cancel) { dialog, which -> dialog.dismiss() }
+            .show()
+    }
 
+    private fun createNewNote(): Note {
         return Note(
             UUID.randomUUID().toString(),
             titleEt.text.toString(),
-            bodyEt.text.toString(),
-            color = if (count % 2 == 0) {
-                Color.VIOLET
-            } else {
-                Color.BLUE
-            }
+            bodyEt.text.toString()
         )
     }
 
-    override fun renderData(data: Note?) {
-        this.note = data
+    override fun renderData(data: NoteViewState.Data) {
+        if (data.isDeleted) finish()
+        this.note = data.note
         initView()
+    }
+
+    private fun setToolbarColor(color: Color) {
+        toolbar.setBackgroundColor(color.getColorInt(this))
+    }
+
+    fun togglePalette() {
+        if (colorPicker.isOpen) {
+            colorPicker.close()
+        } else {
+            colorPicker.open()
+        }
+    }
+
+    override fun onBackPressed() {
+        if (colorPicker.isOpen) {
+            colorPicker.close()
+            return
+        }
+        super.onBackPressed()
     }
 }

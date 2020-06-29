@@ -6,8 +6,8 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
-import kotlinx.android.synthetic.main.item_note.view.*
-
+import kotlinx.android.extensions.LayoutContainer
+import kotlinx.android.synthetic.main.item_note.*
 import ru.andreysozonov.notes.R
 import ru.andreysozonov.notes.data.entity.Color
 import ru.andreysozonov.notes.data.entity.Note
@@ -38,9 +38,10 @@ class MainAdapter(private val onItemClickListener: OnItemClickListener) :
         }
     }
 
-    inner class NoteViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    inner class NoteViewHolder(override val containerView: View) :
+        RecyclerView.ViewHolder(containerView), LayoutContainer {
 
-        fun bind(note: Note) = with(itemView) {
+        fun bind(note: Note) {
             title.text = note.title
             body.text = note.note
 
@@ -54,7 +55,7 @@ class MainAdapter(private val onItemClickListener: OnItemClickListener) :
                 Color.BLUE -> R.color.color_blue
             }
 
-            setBackgroundColor(ContextCompat.getColor(itemView.context, color))
+            itemView.setBackgroundColor(ContextCompat.getColor(itemView.context, color))
             itemView.setOnClickListener { onItemClickListener.onItemClick(note) }
         }
     }

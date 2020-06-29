@@ -4,21 +4,21 @@ package ru.andreysozonov.notes.ui.main
 import androidx.lifecycle.Observer
 import ru.andreysozonov.notes.data.NotesRepository
 import ru.andreysozonov.notes.data.entity.Note
-import ru.andreysozonov.notes.data.model.NoteResult
+import ru.andreysozonov.notes.data.model.Result
 import ru.andreysozonov.notes.ui.base.BaseViewModel
 
 
-class MainViewModel(repository: NotesRepository = NotesRepository) :
+class MainViewModel(repository: NotesRepository) :
     BaseViewModel<List<Note>?, MainViewState>() {
 
-    private val notesObserver = object : Observer<NoteResult> {
-        override fun onChanged(t: NoteResult?) {
+    private val notesObserver = object : Observer<Result> {
+        override fun onChanged(t: Result?) {
             if (t == null) return
             when (t) {
-                is NoteResult.Success<*> -> {
+                is Result.Success<*> -> {
                     viewStateLiveData.value = MainViewState(notes = t.data as List<Note>)
                 }
-                is NoteResult.Error -> {
+                is Result.Error -> {
                     viewStateLiveData.value = MainViewState(error = t.error)
                 }
             }
