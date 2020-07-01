@@ -1,6 +1,7 @@
 package ru.andreysozonov.notes.ui.main
 
 
+import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.Observer
 import ru.andreysozonov.notes.data.NotesRepository
 import ru.andreysozonov.notes.data.entity.Note
@@ -8,7 +9,7 @@ import ru.andreysozonov.notes.data.model.Result
 import ru.andreysozonov.notes.ui.base.BaseViewModel
 
 
-class MainViewModel(repository: NotesRepository) :
+open class MainViewModel(repository: NotesRepository) :
     BaseViewModel<List<Note>?, MainViewState>() {
 
     private val notesObserver = object : Observer<Result> {
@@ -33,7 +34,8 @@ class MainViewModel(repository: NotesRepository) :
         repositoryNotes.observeForever(notesObserver)
     }
 
-    override fun onCleared() {
+    @VisibleForTesting
+    public override fun onCleared() {
         repositoryNotes.removeObserver(notesObserver)
     }
 }
