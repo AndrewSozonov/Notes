@@ -9,6 +9,7 @@ import android.text.TextWatcher
 import android.view.Menu
 import android.view.MenuItem
 import kotlinx.android.synthetic.main.activity_note.*
+import kotlinx.coroutines.launch
 import org.koin.android.viewmodel.ext.android.viewModel
 import ru.andreysozonov.notes.R
 import ru.andreysozonov.notes.common.getColorInt
@@ -18,7 +19,7 @@ import ru.andreysozonov.notes.ui.base.BaseActivity
 import java.text.SimpleDateFormat
 import java.util.*
 
-class NoteActivity : BaseActivity<NoteViewState.Data, NoteViewState>() {
+class NoteActivity : BaseActivity<NoteViewState.Data>() {
 
     companion object {
         private val EXTRA_NOTE = NoteActivity::class.java.name + "Extra.note"
@@ -103,17 +104,21 @@ class NoteActivity : BaseActivity<NoteViewState.Data, NoteViewState>() {
     private fun saveNote() {
         if (titleEt.text == null || titleEt.text!!.length < 3) return
 
-        note = note?.copy(
-            title = titleEt.text.toString(),
-            note = bodyEt.text.toString(),
-            lastChanged = Date(),
-            color = color
-        )
-            ?: createNewNote()
+        launch {
+            note = note?.copy(
+                title = titleEt.text.toString(),
+                note = bodyEt.text.toString(),
+                lastChanged = Date(),
+                color = color
+            )
+                ?: createNewNote()
 
-        note?.let {
-            model.saveChanges(it)
+            note?.let {
+                model.saveChanges(it)
+            }
         }
+
+
     }
 
     fun deleteNote() {

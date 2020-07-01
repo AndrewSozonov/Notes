@@ -17,7 +17,7 @@ import ru.andreysozonov.notes.ui.base.BaseActivity
 import ru.andreysozonov.notes.ui.note.NoteActivity
 import ru.andreysozonov.notes.ui.splash.SplashActivity
 
-class MainActivity : BaseActivity<List<Note>?, MainViewState>(), LogoutDialog.LogoutListener {
+class MainActivity : BaseActivity<List<Note>?>(), LogoutDialog.LogoutListener {
 
     companion object {
         fun getStartIntent(context: Context) = Intent(context, MainActivity::class.java)
