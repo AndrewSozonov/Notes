@@ -7,7 +7,7 @@ import ru.andreysozonov.notes.ui.main.MainActivity
 
 private const val START_DELAY = 1000L
 
-class SplashActivity : BaseActivity<Boolean?, SplashViewState>() {
+class SplashActivity : BaseActivity<Boolean>() {
 
     override val model: SplashViewModel by viewModel()
 
@@ -18,7 +18,7 @@ class SplashActivity : BaseActivity<Boolean?, SplashViewState>() {
         Handler().postDelayed({ model.requestUser() }, START_DELAY)
     }
 
-    override fun renderData(data: Boolean?) {
+    override fun renderData(data: Boolean) {
         data?.takeIf { it }?.let {
             startMainActivity()
         }
